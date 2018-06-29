@@ -33,10 +33,9 @@ while true
 	${IDLENODES[@]}"
 
 	## Create array with IP numbers of nodes that are running jobs
-	readarray BUSYMACHINES < <(condor_q -l -submitter centos | grep -oE "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}" | sort -u)
+	readarray BUSYMACHINES < <(condor_q -l -submitter galaxy -submitter centos | grep -oE "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}" | sort -u)
 	echo "The following execute nodes are running jobs 
 	${BUSYMACHINES[@]}"
-	let BUSYMACHINESPLUS1=${#BUSYMACHINES[@]}+1
 
 	## Create array with name and IP address information of the execute nodes that have been created on openstack
 	readarray EXECUTENODES < <(openstack server list --name htcondorexecute -c Name -c Networks -c Status -f value)
