@@ -25,7 +25,6 @@ while true
 	## Count how many jobs are currently running
 	RUNNINGJOBS=$(condor_q -l -submitter galaxy -submitter centos | grep -wc 'JobStatus = 2')
 	echo "The number of running jobs is $RUNNINGJOBS"
-	let RUNNINGJOBSPLUS1=RUNNINGJOBS+1
 
 	## Create array with IP numbers of idle nodes
 	readarray IDLENODES < <(condor_status -l | grep -iEo 'StartdIpAddr = "<[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | uniq -u | grep -Eo "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}")
