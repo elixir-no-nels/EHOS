@@ -9,8 +9,8 @@ while true
 	date
 
 	## Set variables for maximum and minimum number of nodes
-	MAXNODES=8
-	MINNODES=4
+	MAXNODES=6
+	MINNODES=2
 
 	## Beginning of variable creation and main loop
 	do
