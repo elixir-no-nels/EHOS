@@ -11,7 +11,7 @@ in that it is very simple and has no dependencies.
 This has been developed on Centos7 on an OpenStack cloud running version 3.15.0, and HTCondor version 8.7.8.
 
 ## Installation and setup  
-First you need to enter your OpenStack login credentials into a keyston_rc.sh file and source it so the `openstack` command can run properly. 
+First you need to enter your OpenStack login credentials into a keystone_rc.sh file and source it so the `openstack` command can run properly. 
 Then clone this repository `git clone https://github.com/elixir-no-nels/EHOS` and run `./DynamicVM-DynamicScaling-0.2.sh` and it's running with the base 
 configuration settings. You probably want to change them.
 
@@ -22,4 +22,4 @@ possible.
 The comments in the configuration.sh file should be enough to explain what the variables are used for.
 
 ## Bugs  
-It does not always report the correct number of available threads, it seems to occur when mixed flavors are running.
+There are various quirks that I will or won't write here.
