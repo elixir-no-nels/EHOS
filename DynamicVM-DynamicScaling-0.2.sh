@@ -25,6 +25,7 @@ while true
 	## Count how many jobs are currently running
 	RUNNINGJOBS=$(condor_q -l -submitter galaxy -submitter centos | grep -wc 'JobStatus = 2')
 	echo "The number of running jobs is $RUNNINGJOBS"
+	let RUNNINGJOBSPLUS1=RUNNINGJOBS+1
 
 	## Create array with IP numbers of idle nodes
 	readarray IDLENODES < <(condor_status -l | grep -iEo 'StartdIpAddr = "<[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | uniq -u | grep -Eo "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}")
@@ -47,6 +48,9 @@ while true
 	MACHINETOKILL=$(echo ${EXECUTENODES[@]} | grep -Eo "htcondorexecute-[0-9]* ACTIVE dualStack=${IDLENODES[0]}" | awk {' print $1'})
 	echo "\$MACHINETOKILL is $MACHINETOKILL"
 
+	## True or false variable that determines if a larger than standard VM should be created or not, only checks idle jobs
+	REQCPUS=$(condor_q -l -submitter galaxy -submitter centos | grep -o '^JobStatus = 1\|^RequestCpus = [4,8]' | grep -c "RequestCpus = 4")
+
 	## Display information about how many jobs are idle and how many execute nodes are available
 	echo "$IDLEJOBS jobs are idle and there's ${#EXECUTENODES[@]} execute node(s) available"
 
@@ -61,7 +65,7 @@ while true
 
 	echo "Redundant node creation conditional equals: [[ "$IDLEJOBS" -eq 0 && "$RUNNINGJOBS" -gt 1 && "$RUNNINGJOBS" -eq "$MAXJOBS" && ${#EXECUTENODES[@]} -le "$MAXNODES" ]]"
 
-	echo "Idle node deletion conditional equals: [[ "${#IDLENODES[@]}" -ge "${#BUSYMACHINES[@]}" && "${#IDLENODES[@]}" -ge "$MINNODES" ]]"
+	echo "Idle node deletion conditional equals: [[ "${#IDLENODES[@]}" -ge "${#BUSYMACHINES[@]}" && "${#IDLENODES[@]}" -gt "$MINNODES" ]]"
 
 	## Delete idle nodes that are not needed
 	if [[ "${#IDLENODES[@]}" -ge "${#BUSYMACHINES[@]}" && "${#IDLENODES[@]}" -gt "$MINNODES" ]]
@@ -86,8 +90,9 @@ while true
 
 	## Create execute node if there are idle jobs and the max vm quota is not exceeded
 	elif [[ "$IDLEJOBS" -gt 0 && "${#EXECUTENODES[@]}" -le "$MAXNODES" ]]
-		then if [ "$IDLEJOBS" -gt 40 ]
-			then VM=$(date +%s) && \
+		then if [[ "$REQCPUS" -ge 4 ]] || [[ "$IDLEJOBS" -gt 40 ]]
+			then 
+			VM=$(date +%s) && \
 			echo "There are idle jobs, sending create command for HTCondorExecute-"${VM}"" && \
 			openstack server create --flavor m1.xlarge --image HTCondorExecute-18-06-18 --nic net-id=dualStack \
 			--security-group Pipeline-development --security-group test --security-group default --key-name vgcn-testing htcondorexecute-"${VM}" && \
