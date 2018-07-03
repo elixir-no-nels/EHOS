@@ -66,8 +66,7 @@ do
 	elif [[ "${#EXECUTENODES[@]}" -lt "$MINNODES" && "${#EXECUTENODES[@]}" -le "$MAXNODES" ]] 2>>logfile; then
 		VM=$(date +%s) &&
 			echo "All execute nodes are full, or the minimum number of machines is not running, create command will execute" &&
-			openstack server create --flavor $SMALL --image $CONDORIMAGENAME ${NIC[@]} \
-				${SECURITYGROUPS[@]} --key-name $SSHKEY $CONDORINSTANCENAME-"${VM}" 2>>logfile &&
+			./createvm.sh $SMALL 2>>logfile
 			echo "Create command for "$CONDORINSTANCENAME"-"${VM}" sent" &&
 			date &&
 			sleep $LONGSLEEP
@@ -76,16 +75,14 @@ do
 	elif [[ "$IDLEJOBS" -gt 0 && "${#EXECUTENODES[@]}" -le "$MAXNODES" ]] 2>>logfile; then if [[ "$REQCPUS" -ge "$LARGEVMC" ]] || [[ "$IDLEJOBS" -gt "$IDLEJOBVMC" ]] 2>>logfile; then
 		VM=$(date +%s) &&
 			echo "There are idle jobs, sending create command for "$CONDORINSTANCENAME"-"${VM}"" &&
-			openstack server create --flavor $LARGE --image $CONDORIMAGENAME ${NIC[@]} \
-				${SECURITYGROUPS[@]} --key-name $SSHKEY $CONDORINSTANCENAME-"${VM}" 2>>logfile &&
+			./createvm.sh $LARGE 2>>logfile
 			echo "Create command for "$CONDORINSTANCENAME"-"${VM}" sent" &&
 			date &&
 			sleep $LONGSLEEP
 	else
 		VM=$(date +%s) &&
 			echo "There are idle jobs, sending create command for "$CONDORINSTANCENAME"-"${VM}"" &&
-			openstack server create --flavor $SMALL --image $CONDORIMAGENAME ${NIC[@]} \
-				${SECURITYGROUPS[@]} --key-name $SSHKEY $CONDORINSTANCENAME-"${VM}" 2>>logfile &&
+			./createvm.sh $SMALL 2>>logfile
 			echo "Create command for "$CONDORINSTANCENAME"-"${VM}" sent" &&
 			date &&
 			sleep $LONGSLEEP
@@ -94,8 +91,7 @@ do
 	elif [[ "$IDLEJOBS" -eq 0 && "$RUNNINGJOBS" -gt 1 && "$RUNNINGJOBS" -eq "$MAXJOBS" && ${#EXECUTENODES[@]} -le "$MAXNODES" ]] 2>>logfile; then
 		VM=$(date +%s) &&
 			echo "Redundant node is needed, sending create command for "$CONDORINSTANCENAME"-"${VM}"" &&
-			openstack server create --flavor $SMALL --image $CONDORIMAGENAME ${NIC[@]} \
-				${SECURITYGROUPS[@]} --key-name $SSHKEY $CONDORINSTANCENAME-"${VM}" 2>>logfile &&
+			./createvm.sh $SMALL 2>>logfile
 			echo "Create command for "$CONDORINSTANCENAME"-"${VM}" sent" &&
 			date &&
 			sleep $LONGSLEEP

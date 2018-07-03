@@ -6,6 +6,9 @@
 MAXNODES=6
 MINNODES=2
 
+## The script needs to monitor the submitting user, or users, to count running jobs and do other things.
+readarray SUBMITTINGUSERS < <(echo "-submitter galaxy"; echo "-submitter centos")
+
 ## This is the base name that each execute node will get in the openstack interface. To make each node unique the main script will append the unix time
 ## at the time of creation. An example is "htcondorexecute-1515581225".
 CONDORINSTANCENAME=htcondorexecute
@@ -22,9 +25,6 @@ SSHKEY=vgcn-testing
 ## Net id
 readarray NIC < <(echo "--nic net-id=dualStack")
 
-## The script needs to monitor the submitting user, or users, to count running jobs and do other things.
-readarray SUBMITTINGUSERS < <(echo "-submitter galaxy"; echo "-submitter centos")
-
 ## Set flavor size for small or large VMs.
 ## m1.large: 2 cores, 8GB RAM
 ## m1.xlarge: 4 cores, 16B RAM
@@ -32,9 +32,6 @@ readarray SUBMITTINGUSERS < <(echo "-submitter galaxy"; echo "-submitter centos"
 ## m2.4xlarge: 16 cores, 64 GB RAM
 SMALL=m1.large
 LARGE=m1.xlarge
-
-## SSH key for the HTCondor execute node
-SSHKEY=vgcn-testing
 
 ## Idle job VM creation variable, when the number of idle jobs is greater than this number, a larger VM is created to speed up the job execution
 IDLEJOBVMC=40
