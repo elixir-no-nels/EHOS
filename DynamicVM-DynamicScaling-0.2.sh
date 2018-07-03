@@ -27,25 +27,15 @@ while true
 
 	## Create array with IP numbers of idle nodes
 	readarray IDLENODES < <(condor_status -l | grep -iEo 'StartdIpAddr = "<[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | uniq -u | grep -Eo "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}")
-	echo "The number of idle execute nodes is ${#IDLENODES[@]} and the idle node IP(s) is
-	${IDLENODES[@]}"
+	echo "The number of idle execute nodes is ${#IDLENODES[@]} and the idle node IP(s) is "$(printf '%s\n' "${IDLENODES[@]}")""
 
 	## Create array with IP numbers of nodes that are running jobs
 	readarray BUSYMACHINES < <(condor_q -l $(echo ${SUBMITTINGUSERS[@]}) | grep -oE "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}" | sort -u)
-	echo "The following execute nodes are running jobs 
-	${BUSYMACHINES[@]}"
+	echo "The following execute nodes are running jobs "$(printf '%s\n' "${BUSYMACHINES[@]}")""
 
 	## Create array with name and IP address information of the execute nodes that have been created on openstack
 	readarray EXECUTENODES < <(openstack server list --name $CONDORINSTANCENAME -c Name -c Networks -c Status -f value)
-	echo "Total number of execute nodes in the pool is: 
-	${#EXECUTENODES[@]}
-	and the name(s) of the running node(s) is
-	${EXECUTENODES[@]}"
-
-#	paste "Total number of execute nodes in the pool is: 
-#	${#EXECUTENODES[@]}
-#	and the name(s) of the running node(s) is
-#	${EXECUTENODES[@]}"
+	echo "Total number of execute nodes in the pool is: ${#EXECUTENODES[@]} and the name(s) of the running node(s) is "$(printf '%s\n' "${EXECUTENODES[@]}")""
 
 	## Variable that chooses which node to kill based on the conditionals below
 	MACHINETOKILL=$(echo ${EXECUTENODES[@]} | grep -Eo "$CONDORINSTANCENAME-[0-9]* ACTIVE dualStack=${IDLENODES[0]}" | awk {' print $1 '})
