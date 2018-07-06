@@ -28,25 +28,30 @@ do
 
 	## Create array with IP numbers of idle nodes
 	readarray IDLENODES < <(condor_status -l | grep -iEo 'StartdIpAddr = "<[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | uniq -u | grep -Eo "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}")
-	echo "The number of idle execute nodes is ${#IDLENODES[@]} and the idle node IP(s) is "$(printf '%s\n' "${IDLENODES[@]}")""
+#	echo "The number of idle execute nodes is ${#IDLENODES[@]} and the idle node IP(s) is "$(printf '%s\n' "${IDLENODES[@]}")""
 
 	## Create array with IP numbers of nodes that are running jobs
 	readarray BUSYMACHINES < <(condor_q -l $(echo ${SUBMITTINGUSERS[@]}) | grep -oE "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}" | sort -u)
-	echo "The following execute nodes are running jobs "$(printf '%s\n' "${BUSYMACHINES[@]}")""
+	echo "The following execute nodes are running jobs: "$(printf '%s\n' "${BUSYMACHINES[@]}")""
 
 	## Create array with name and IP address information of the execute nodes that have been created on openstack
 	readarray EXECUTENODES < <(openstack server list --name $CONDORINSTANCENAME -c Name -c Networks -c Status -f value)
-	echo "Total number of execute nodes in the pool is: ${#EXECUTENODES[@]} and the name(s) of the running node(s) is "$(printf '%s\n' "${EXECUTENODES[@]}")""
+	echo "The total number of execute nodes in the pool is: ${#EXECUTENODES[@]}"
+	i=0
+	while [ $i -lt ${#EXECUTENODES[@]} ]; do 
+		printf "${EXECUTENODES[$i]}"
+		let i=i+1;
+	done
 
 	## Variable that chooses which node to kill based on the conditionals below
 	MACHINETOKILL=$(echo ${EXECUTENODES[@]} | grep -Eo "$CONDORINSTANCENAME-[0-9]* ACTIVE dualStack=${IDLENODES[0]}" | awk {' print $1 '})
-	echo "\$MACHINETOKILL is $MACHINETOKILL"
+#	echo "\$MACHINETOKILL is $MACHINETOKILL"
 
 	## True or false variable that determines if a larger than standard VM should be created or not, only checks idle jobs
 	REQCPUS=$(condor_q -l $(echo ${SUBMITTINGUSERS[@]}) | grep -o '^JobStatus = 1\|^RequestCpus = [4,8]' | grep -c "RequestCpus = 4")
 
 	## Display information about how many jobs are idle and how many execute nodes are available
-	echo "$IDLEJOBS jobs are idle and there's ${#EXECUTENODES[@]} execute node(s) available"
+#	echo "$IDLEJOBS jobs are idle and there's ${#EXECUTENODES[@]} execute node(s) available"
 
 	## Delete idle nodes that are not needed
 	if [[ "${#IDLENODES[@]}" -ge "${#BUSYMACHINES[@]}" && "${#IDLENODES[@]}" -gt "$MINNODES" ]] 2>>logfile; then
@@ -66,23 +71,23 @@ do
 	elif [[ "${#EXECUTENODES[@]}" -lt "$MINNODES" && "${#EXECUTENODES[@]}" -le "$MAXNODES" ]] 2>>logfile; then
 		VM=$(date +%s) &&
 			echo "All execute nodes are full, or the minimum number of machines is not running, create command will execute" &&
-			./createvm.sh $SMALL 2>>logfile
+			./createvm.sh $SMALL 2>&1>>logfile
 			echo "Create command for "$CONDORINSTANCENAME"-"${VM}" sent" &&
 			date &&
 			sleep $LONGSLEEP
 
 		## Create execute node if there are idle jobs and the max vm quota is not exceeded
-	elif [[ "$IDLEJOBS" -gt 0 && "${#EXECUTENODES[@]}" -le "$MAXNODES" ]] 2>>logfile; then if [[ "$REQCPUS" -ge "$LARGEVMC" ]] || [[ "$IDLEJOBS" -gt "$IDLEJOBVMC" ]] 2>>logfile; then
+	elif [[ "$IDLEJOBS" -gt 0 && "${#EXECUTENODES[@]}" -le "$MAXNODES" ]] 2>>logfile; then if [[ "$REQCPUS" -ge 1 ]] || [[ "$IDLEJOBS" -gt "$IDLEJOBVMC" ]] 2>>logfile; then
 		VM=$(date +%s) &&
 			echo "There are idle jobs, sending create command for "$CONDORINSTANCENAME"-"${VM}"" &&
-			./createvm.sh $LARGE 2>>logfile
+			./createvm.sh $LARGE 2>&1>>logfile
 			echo "Create command for "$CONDORINSTANCENAME"-"${VM}" sent" &&
 			date &&
 			sleep $LONGSLEEP
 	else
 		VM=$(date +%s) &&
 			echo "There are idle jobs, sending create command for "$CONDORINSTANCENAME"-"${VM}"" &&
-			./createvm.sh $SMALL 2>>logfile
+			./createvm.sh $SMALL 2>&1>>logfile
 			echo "Create command for "$CONDORINSTANCENAME"-"${VM}" sent" &&
 			date &&
 			sleep $LONGSLEEP
@@ -91,7 +96,7 @@ do
 	elif [[ "$IDLEJOBS" -eq 0 && "$RUNNINGJOBS" -gt 1 && "$RUNNINGJOBS" -eq "$MAXJOBS" && ${#EXECUTENODES[@]} -le "$MAXNODES" ]] 2>>logfile; then
 		VM=$(date +%s) &&
 			echo "Redundant node is needed, sending create command for "$CONDORINSTANCENAME"-"${VM}"" &&
-			./createvm.sh $SMALL 2>>logfile
+			./createvm.sh $SMALL 2>&1>>logfile
 			echo "Create command for "$CONDORINSTANCENAME"-"${VM}" sent" &&
 			date &&
 			sleep $LONGSLEEP
