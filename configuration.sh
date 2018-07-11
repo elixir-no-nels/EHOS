@@ -6,17 +6,20 @@
 MAXNODES=6
 MINNODES=2
 
-## The script needs to monitor the submitting user, or users, to count running jobs and do other things.
+## The script needs to monitor the submitting user(s) to count running jobs and do other things.
 readarray SUBMITTINGUSERS < <(echo "-submitter galaxy"; echo "-submitter centos")
 
 ## This is the base name that each execute node will get in the openstack interface. To make each node unique the main script will append the unix time
 ## at the time of creation. An example is "htcondorexecute-1515581225".
 CONDORINSTANCENAME=htcondorexecute
 
-## Name of the VM image that has a preconfigured HTCondor execute node installed on it
-CONDORIMAGENAME=HTCondorExecute-18-06-18
+## Name of the base VM image that will be used as execute node
+CONDORIMAGENAME=HTCondorVanilla-09-07-18
+#CONDORIMAGENAME=HTCondorExecute-09-07-18
+#CONDORIMAGENAME=HTCondorExecute-18-06-18
+#CONDORIMAGENAME=("GOLD CentOS 7")
 
-## Securitu group name or names for openstack
+## Security group name(s) openstack
 readarray SECURITYGROUPS < <(echo "--security-group Pipeline-development"; echo "--security-group test"; echo "--security-group default")
 
 ## SSH key name for VM administration, this needs to exist already
@@ -44,3 +47,9 @@ LARGEVMC=4
 ## Sleep variables for the various sleep commands
 SHORTSLEEP=15
 LONGSLEEP=60
+
+## How many redundant nodes to create
+REDUNDANTNODES=1
+
+## How many nodes to start when there are many queued jobs
+STARTMANY=1

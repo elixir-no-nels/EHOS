@@ -78,10 +78,12 @@ do
 
 		## Create execute node if there are idle jobs and the max vm quota is not exceeded
 	elif [[ "$IDLEJOBS" -gt 0 && "${#EXECUTENODES[@]}" -le "$MAXNODES" ]] 2>>logfile; then if [[ "$REQCPUS" -ge 1 ]] || [[ "$IDLEJOBS" -gt "$IDLEJOBVMC" ]] 2>>logfile; then
-		VM=$(date +%s) &&
-			echo "There are idle jobs, sending create command for "$CONDORINSTANCENAME"-"${VM}"" &&
-			./createvm.sh $LARGE 2>&1>>logfile
-			echo "Create command for "$CONDORINSTANCENAME"-"${VM}" sent" &&
+			for i in $(seq 1 $STARTMANY); do
+				VM=$(date +%s)
+				echo "There are idle jobs, sending create command for "$CONDORINSTANCENAME"-"${VM}"" &&
+				./createvm.sh $LARGE 2>&1>>logfile && sleep 1;
+				echo "Create command for "$CONDORINSTANCENAME"-"${VM}" sent"
+			done
 			date &&
 			sleep $LONGSLEEP
 	else
@@ -96,7 +98,9 @@ do
 	elif [[ "$IDLEJOBS" -eq 0 && "$RUNNINGJOBS" -gt 1 && "$RUNNINGJOBS" -eq "$MAXJOBS" && ${#EXECUTENODES[@]} -le "$MAXNODES" ]] 2>>logfile; then
 		VM=$(date +%s) &&
 			echo "Redundant node is needed, sending create command for "$CONDORINSTANCENAME"-"${VM}"" &&
-			./createvm.sh $SMALL 2>&1>>logfile
+			for i in $(seq 1 $REDUNDANTNODES); do
+				./createvm.sh $SMALL 2>&1>>logfile && sleep 1;
+			done
 			echo "Create command for "$CONDORINSTANCENAME"-"${VM}" sent" &&
 			date &&
 			sleep $LONGSLEEP

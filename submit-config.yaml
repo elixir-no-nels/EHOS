@@ -1,0 +1,34 @@
+#cloud-config
+# vim: syntax=yaml
+#
+# This is the configuration syntax that the write_files module
+# will know how to understand. encoding can be given b64 or gzip or (gz+b64).
+# The content will be decoded accordingly and then written to the path that is
+# provided. 
+#
+# Note: Content strings here are truncated for example purposes.
+# Run yum upgrade
+package_upgrade: true
+
+write_files:
+-   content: |
+        ##  What machine is your central manager?
+        
+        CONDOR_HOST = 158.39.77.41
+        
+        ##  This macro determines what daemons the condor_master will start and keep its watchful eyes on.
+        ##  The list is a comma or space separated list of subsystem names
+        
+        DAEMON_LIST = MASTER, SCHEDD
+        DISCARD_SESSION_KEYRING_ON_STARTUP = False
+        STARTER_ALLOW_RUNAS_OWNER = TRUE
+        
+        UID_DOMAIN = uib.no
+        TRUST_UID_DOMAIN = TRUE
+        DEFAULT_DOMAIN_NAME = uib.no
+    owner: root:root
+    path: /etc/condor/config.d/00personal_condor.config
+    permissions: '0644'
+runcmd:
+- condor_reconfig
+

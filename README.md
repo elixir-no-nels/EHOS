@@ -1,25 +1,40 @@
 # EHOS
 **E**lastic **H**TCondor **O**penStack **S**caling - Pronounced EOS  
-This script is for dynamic creation and deletion of OpenStack virtual machines that run HTCondor execute nodes. It is intended for a scenario where you 
-want to run a compute cluster with a low overhead when the usage is low, and you want to be able to dynamically scale up and scale down your cluster as 
-the usage increases or decreases. There currently is support for similar functionality in HTCondor, called `condor_annex`, but it only works with amazon. 
-It seems like there will be OpenStack support in future releases which will render this script obsolete. There's also the HTCondor grid universe for 
-OpenStack, but it has no dynamic scaling. Many others have built various methods to dynamically scale an HTCondor cluster, but this implementation differs 
-in that it is very simple and has no dependencies. 
+This script is for dynamic creation and deletion of OpenStack virtual machines that run HTCondor execute nodes. It is intended for a scenario where you want to run a compute cluster with a low overhead when the usage is low, and you want to be able to dynamically scale up and scale down your cluster as the usage increases or decreases. There currently is support for similar functionality in HTCondor, called `condor_annex`, but it only works with amazon. It seems like there will be OpenStack support in future releases which will render this script obsolete. There's also the HTCondor grid universe for OpenStack, but it has no dynamic scaling. Many others have built various methods to dynamically scale an HTCondor cluster, but this implementation differs in that it is very simple and has no dependencies.
 
-## Dependencies  
+## Dependencies
 This has been developed on Centos7 on an OpenStack cloud running version 3.15.0, and HTCondor version 8.7.8.
 
-## Installation and setup  
-First you need to enter your OpenStack login credentials into a keystone_rc.sh file and source it so the `openstack` command can run properly. 
-Then clone this repository `git clone https://github.com/elixir-no-nels/EHOS` and run `./DynamicVM-DynamicScaling-0.2.sh` and it's running with the base 
-configuration settings. You probably want to change them.
+# Installation and setup
+To use the OpenStack CLI you need to run `sudo pip install python-openstackclient`.
+These instructions assume you're familiar with OpenStack and HTCondor, or you should be an adventurous person because there are manual steps that require basic understanding of how to use a command line. You must manually edit each command with your specific cloud details, prefered image names etc, don't just copy/paste and assume it'll work because it won't.
+Doing it all on the web interface is impossible, so if you're not familiar with manual creation of virtual machines with the OpenStack CLI, this is a good time to get familiar with that. First you need to enter your OpenStack login credentials into a keystone_rc.sh file, you can use the one in this repository as a sample file, ask you admin where to find the information for the `keystone_rc.sh` file. When you have filled in all details correctly, run `source keystone_rc.sh` and then `openstack server list` to verify that it works.  
 
-## Usage  
-Assuming you've already created a VM image with a preconfigured HTCondor execute node installed, and created an SSH key for it, you're good to go to start 
-editing the configuration.sh file to suit your setup. The configuration file is read every time the while loops repeats, so on the fly configuration is 
-possible.
-The comments in the configuration.sh file should be enough to explain what the variables are used for.
+## Creating the base image
+To build the base HTCondor image you can use the the `vanilla-condor.sh` script, edit it according to your base image needs, you might not want everything that gets installed, and might want to install things aren't installed. When the config file has been edited, use the following code as a template, edit it with you specific details and hit enter when you're done:  
+`openstack server create --flavor a.flavor --image ACentOS7Image --nic net-id=aNetID --security-group ASecurityGroup --key-name your-ssh-key --user-data vanilla-condor.sh HTCondorBaseImage`
+Once it has been built you need to make a snapshot of it, to do that you need the image ID, to find that, run `openstack server list`, copy the ID for your HTCondorBaseImage and paste it into the following command: `openstack image create --id A-Long-ID-With-Letters-And-Numbers NameOfBackedUpImage`  
+Now that you have a snapshot of the base image you can use that to create an HTCondor master node and an HTCondor execute node.  
 
-## Bugs  
-There are various quirks that I will or won't write here.
+## Creating the master node
+The master node needs manual configuration when it has been created, but before you create it, edit the `master-config.yaml` and change the variables with correct IP numbers etc. In case you want to add a line, make sure to use space instead of tab to create the indentation, otherwise it won't work when you run the create command later.  
+Once you're done editing run the following command to create the master node:  
+`openstack server create --flavor a.flavor --image NameOfBackedUpImage --nic net-id=ASecurityGroup --key-name your-ssh-key --user-data master-config.yaml HTCondorMaster`  
+Once it has been created you must SSH into it and open `/etc/condor/condor_config` and set `CONDOR_HOST =` to your htcondor master node IP.
+When you're done editing, save and exit and then run `condor_reconfig` to load the new config file.  
+
+## Creating the execute node
+Two files must be edited, first open the `execute-config.yaml` and change `CONDOR_HOST =` to the address of your master node, then go through each line to see what else needs to change for your setup to work. If this is completely new to you, it's time to learn on your own because you need to know this. Once you're don with the yaml file you need to edit `configuration.sh` and edit each line according to your local requirements and preferences. Each line should be sufficiently explained by the comments. Assuming that the `configuration.sh` file is correctly edited we can let the main EHOS script do the rest for us. If you have gone through each point in the configuration file and verified that every detail is correct, the `DynamicVM-DynamicScaling-*.sh` script will take care of creating and deleting execute nodes for you. But if you want to troubleshoot things manually, use this line to verify that you can create an execute node yourself:  
+`openstack server create --flavor m1.large --image NameOfBackedUpImage --nic net-id=dualStack --security-group default --key-name your-ssh-key --user-data execute-config.yaml HTCondorManuallyCreatedExecuteNode`
+
+That should be it, just run `./DynamicVM-DynamicScaling-0.2.1.sh`, sit back and watch it do its magic.
+
+## Good things to know
+The `configuration.sh` file is read every time the loop in the main script runs again, so you can do on the fly changes to the script. The same is true for the `createvm.sh` script, every time it runs it reads the `configuration.sh` file, so you don't need to restart the main script for changes to take effect.  
+If you want a logfile you can run `./DynamicVM-DynamicScaling-0.2.1.sh 2>&1>>logfile` to capture relevant events to the logfile. This is the preferred mode of execution since you will get information about what has happened in case you need to troubleshoot or something.
+
+## Bugs
+There is a possibility that the `openstack server list` command prints out the `dualStack=` IP information in reverse order, meaning that
+instead of printing `dualStack=127.0.0.1, 1000:100:1:1000::10a0` it prints `dualStack=1000:100:1:1000::10a0, 127.0.0.1`, and if that happens
+the MACHINETOKILL code returns a blank since it expects `dualStack=` to have the ipv4 IP, not the ipv6 IP, first. And that results in dynamic
+shutdown of machines to stop working. The current workaround is to kill this node manually. This also highlights one of the limitations of the approach of this script, it's a hack, it's not built on API like code so things are very fragile.  
