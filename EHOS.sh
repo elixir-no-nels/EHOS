@@ -113,8 +113,8 @@ do
 	fi
 	if [ "$IPV6MACHINETOKILL"=true ] ; then
 		openstack server delete "$IPV6MACHINETOKILL"
-		echo "Delete faulty formated instance $IPV6MACHINETOKILL"
-	elif [ "$IPV6MACHINETOKILL"=true ] ; then
+		echo "Deleted faulty formated instance $IPV6MACHINETOKILL"
+	elif [ "$IPV6MACHINETOKILL"=false ] ; then
 		echo "No faulty VM's created, it's all good."
 	fi
 	echo "Nothing is happening, sleeping for 60 seconds" &&
