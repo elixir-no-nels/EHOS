@@ -15,11 +15,11 @@ write_files:
 -   content: |
         ##  What machine is your central manager?
         
-        CONDOR_HOST = 158.39.77.41, 158.39.77.187
+        CONDOR_HOST = 158.39.77.41
         
         ## Pool's short description
         
-        COLLECTOR_NAME = Personal Condor at $(FULL_HOSTNAME)
+        COLLECTOR_NAME = $(CONDOR_HOST)
         
         ##  When is this machine willing to start a job?
         
@@ -63,4 +63,3 @@ write_files:
     permissions: '0644'
 runcmd:
 - condor_reconfig
-

@@ -15,6 +15,8 @@ sudo yum makecache fast
 
 ## Install dependencies
 sudo yum -y install \
+nano \
+python-pip \
 squashfs-tools \
 gcc \
 byobu \
@@ -25,6 +27,9 @@ yum-utils \
 device-mapper-persistent-data \
 lvm2 \
 docker-ce
+
+## Install OpenStack CLI tool
+sudo pip install python-openstackclient
 
 ## Start docker and enable automatic start at boot
 sudo service docker start
@@ -40,7 +45,7 @@ wget https://github.com/singularityware/singularity/releases/download/$VERSION/s
 tar xvf singularity-$VERSION.tar.gz
 cd singularity-$VERSION
 ./configure --prefix=/usr/local
-make
+make -j4
 sudo make install
 
 ## Install HTCondor

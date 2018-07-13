@@ -14,9 +14,7 @@ readarray SUBMITTINGUSERS < <(echo "-submitter galaxy"; echo "-submitter centos"
 CONDORINSTANCENAME=htcondorexecute
 
 ## Name of the base VM image that will be used as execute node
-CONDORIMAGENAME=HTCondorVanilla-09-07-18
-#CONDORIMAGENAME=HTCondorExecute-09-07-18
-#CONDORIMAGENAME=HTCondorExecute-18-06-18
+CONDORIMAGENAME=HTCondorVanilla-11-07-18
 #CONDORIMAGENAME=("GOLD CentOS 7")
 
 ## Security group name(s) openstack
@@ -52,4 +50,4 @@ LONGSLEEP=60
 REDUNDANTNODES=1
 
 ## How many nodes to start when there are many queued jobs
-STARTMANY=1
+STARTMANY=4

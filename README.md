@@ -10,8 +10,8 @@ To use the OpenStack CLI you need to run `sudo pip install python-openstackclien
 These instructions assume you're familiar with OpenStack and HTCondor, or you should be an adventurous person because there are manual steps that require basic understanding of how to use a command line. You must manually edit each command with your specific cloud details, prefered image names etc, don't just copy/paste and assume it'll work because it won't.  
 Doing it all on the web interface is impossible, so if you're not familiar with manual creation of virtual machines with the OpenStack CLI, this is a good time to get familiar with that. If you're a UH-IaaS user, here's a link to the documentation: http://docs.uh-iaas.no/en/latest/  
 And you might also want to keep the HTCondor documentation website open in case you want to research something: http://research.cs.wisc.edu/htcondor/manual/  
-A tip is to use the search function because the documentation can be a bit hard to navigate at time.
-Now that we have that out of the way, the first thing to do is to enter your OpenStack login credentials into a keystone_rc.sh file, you can use the one in this repository as a sample file, ask you admin where to find the information for the `keystone_rc.sh` file. When you have filled in all details correctly, run `source keystone_rc.sh` and then `openstack server list` to verify that it works.  
+A tip is to use the search function because the documentation can be a bit hard to navigate at times.
+Now that we have that out of the way, the first thing to do is to enter your OpenStack login credentials into a `keystone_rc.sh` file, you can use the one in this repository as a sample file, ask your admin where to find the information for the `keystone_rc.sh` file. When you have filled in all details correctly, run `source keystone_rc.sh` and then `openstack server list` to verify that it works.  
 
 ## Creating the base image
 To build the base HTCondor image you can use the the `vanilla-condor.sh` script, edit it according to your base image needs, you might not want everything that gets installed, and might want to install things aren't installed. When the config file has been edited, use the following code as a template, edit it with you specific details and hit enter when you're done:  
@@ -34,7 +34,8 @@ That should be it, just run `./DynamicVM-DynamicScaling-0.2.1.sh`, sit back and 
 
 ## Good things to know
 The `configuration.sh` file is read every time the loop in the main script runs again, so you can do on the fly changes to the script. The same is true for the `createvm.sh` script, every time it runs it reads the `configuration.sh` file, so you don't need to restart the main script for changes to take effect.  
-If you want a logfile you can run `./DynamicVM-DynamicScaling-0.2.1.sh 2>&1>>logfile` to capture relevant events to the logfile. This is the preferred mode of execution since you will get information about what has happened in case you need to troubleshoot or something.
+If you want a logfile you can run `./DynamicVM-DynamicScaling-0.2.1.sh 2>&1>>logfile` to capture relevant events to the logfile. This is the preferred mode of execution since you will get information about what has happened in case you need to troubleshoot or something.  
+You can use the `createvm.sh` script to manually create a VM too, just run `./createvm.sh m1.large` and make sure that the `configuration.sh` file has the correct settings for the VM you want to create. 
 
 ## Bugs
 There is a possibility that the `openstack server list` command prints out the `dualStack=` IP information in reverse order, meaning that
