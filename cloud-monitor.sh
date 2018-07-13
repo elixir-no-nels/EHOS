@@ -4,7 +4,7 @@
 source configuration.sh
 
 watch '
-echo -e `date` "EHOS cloud monitor (CTRL-C to exit):\n";
+echo -e "EHOS cloud monitor (CTRL-C to exit):\n";
 condor_status;
 condor_q ${SUBMITTINGUSERS[@]};
 openstack server list'
