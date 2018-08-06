@@ -14,8 +14,8 @@ readarray SUBMITTINGUSERS < <(echo "-submitter galaxy"; echo "-submitter centos"
 CONDORINSTANCENAME=htcondorexecute
 
 ## Name of the base VM image that will be used as execute node
-CONDORIMAGENAME=HTCondorVanilla-11-07-18
-#CONDORIMAGENAME=("GOLD CentOS 7")
+#CONDORIMAGENAME=HTCondorVanilla-11-07-18
+CONDORIMAGENAME=("GOLD CentOS 7")
 
 ## Security group name(s) openstack
 readarray SECURITYGROUPS < <(echo "--security-group Pipeline-development"; echo "--security-group test"; echo "--security-group default")
@@ -47,7 +47,7 @@ SHORTSLEEP=15
 LONGSLEEP=60
 
 ## How many redundant nodes to create
-REDUNDANTNODES=1
+REDUNDANTNODES=2
 
 ## How many nodes to start when there are many queued jobs
 STARTMANY=4
