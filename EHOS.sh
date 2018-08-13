@@ -38,7 +38,7 @@ do
 	readarray EXECUTENODES < <(openstack server list --name $CONDORINSTANCENAME -c Name -c Networks -c Status -f value)
 	echo "The total number of execute nodes in the pool is: ${#EXECUTENODES[@]}"
 	i=0
-	while [ $i -lt ${#EXECUTENODES[@]} ]; do 
+	while [ $i -lt ${#EXECUTENODES[@]} ]; do
 		printf "${EXECUTENODES[$i]}"
 		let i=i+1;
 	done

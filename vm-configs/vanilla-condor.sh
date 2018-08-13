@@ -26,7 +26,8 @@ libarchive-devel \
 yum-utils \
 device-mapper-persistent-data \
 lvm2 \
-docker-ce
+docker-ce \
+autofs
 
 ## Install OpenStack CLI tool
 sudo pip install python-openstackclient

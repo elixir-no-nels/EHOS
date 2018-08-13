@@ -37,7 +37,27 @@ The `configuration.sh` file is read every time the loop in the main script runs 
 If you want a logfile you can run `./EHOS.sh 2>&1>>logfile` to capture relevant events to the logfile. This is the preferred mode of execution since you will get information about what has happened in case you need to troubleshoot or something.  
 You can use the `createvm.sh` script to manually create a VM too, just run `./createvm.sh m1.large` and make sure that the `configuration.sh` file has the correct settings for the VM you want to create. 
 
-## Bugs
-If the available resource quota is (almost) full the script will still try to create a new VM if it hasn't hit the max number of nodes quota yet. I have tried to find a way to first check the available resource quota to avoid this behavior, but it doesn't seem possible with UH-IaaS, so it will keep needlessly "bumping its head into the wall" unless I make a function that requires the user to fill in the size of each flavor (like m1.large is 2 cores, 8GB RAM, m1.xlarge is 4 cores, 16GB RAM etc) as well as the available quota (number of cores, RAM, instances etc) and then add the running flavors together to calculate how much of the quota has been used.  
-I want to keep the setup process simple though, so it might be better to keep it stupid to preserve simplicity of setup. If you want every feature under the sun and a polished surface you should check out Cloud Scheduler: https://github.com/hep-gc/cloud-scheduler  
-It has everything you need, including a complicated setup and a ton of useful features.
+## EHOS quirks and bugs:
+
+1. If the minimum number of nodes isn't running, and 40+ jobs have been submitted, or a 4 core job has been submitted, it will still only start a "small" VM despite the default setting is to start a large VM when 40+ jobs or a 4 core job has been started.
+This is an edge case and shouldn't be a frequent problem, but it's an unexpected behavior for any user.
+
+2. When the project quota has (almost) been exceeded, e.g the maximum allowed RAM usage may be 128GB, and 120GB has been used and EHOS is trying to start a 16GB RAM VM, it will try and fail endlessly. There is no option in the UH-Sky API to check this manually. 
+
+It's possible to create a function that calculates this manually, but it will require the user to fill in this information manually, and depending on how simple EHOS should be, this will increase the setup complexity and the question is if the gain in functionality justifies the necessary increased setup effort.
+
+Another scenario is if there's e.g 4 cores left in the quota, and EHOS is trying to start an 8 core VM, it will fail because it would exceed the quota. But if the job could also run on a 4 core VM, EHOS cannot try to fill the remaining quota because it cannot act based on the available quota.
+
+It would be nice if it explicitly reported that it couldn't start a new VM due to the limited resources, but it's not possible to capture the error message and act upon it. 
+
+3. When no jobs are running and there are too many redundant nodes running, EHOS kills the execute nodes "in order". That can lead to larger VMs than the specified default will remain running. To understand why this can be a problem, let's assume the following:
+	1. Galaxy has been set to run a specific job on a 16 core execute node because it needs 100% of the resources. 
+	2. Galaxy can also run 4 core jobs.
+		If a 4 core job is running on that VM, EHOS needs to start a new VM, if the quota is exceeded if a new 16 core
+		VM needs to be started, the large job cannot start. But if a small VM had been running and the 4 core job ran
+		on that, EHOS might have been able to start a new VM since 16 + 4 is 20, but 16 + 16 is 32, and 32 might break
+		the limit.
+
+4. A redundant node is only created if all slots in all running execute nodes are full. That means that if a job fills all but one slot, it would make sense to create a redundant node since one slot is possibly not enough for a new job that is started.
+
+5. If EHOS is set to create two redundant nodes, it's possible that only one node is idle if the second one is occupied. Like stated above, this is because EHOS only starts a new node when all slots are filled.
