@@ -6,6 +6,16 @@ This script is for dynamic creation and deletion of OpenStack virtual machines t
 The following graphical overview represents a scenario where EHOS is integrated with two Galaxy servers. It depends on an NFS server on the Galaxy instances to be mounted on the execute nodes. This mounting is handled by the Galaxy server to keep EHOS as a standalone versatile solution that is useful for any kind of scenario, Galaxy related or not.
 ![EHOS-overview](https://raw.githubusercontent.com/elixir-no-nels/EHOS/master/.ehos.png)
 
+## Features
+* Dynamic creation and deletion of execute nodes based on current number of running jobs
+* Minimum and maximum number of running execute nodes
+* Creation of smaller of larger execute nodes based on demands from incoming jobs
+* Creation of redundant execute nodes if all current slots have been filled to allow for faster start of new jobs
+* Dynamic reading of config file making on the fly configuration changes possible, no restart needed for changes to take effect
+* Dynamic reading of variable creation file making on the fly variable creation changes possible, no restart needed for changes to take effect
+* Vanilla base image is created with cloud init and is used for execute node creation
+* Execute nodes are configured using cloud init at the time of creation
+
 ## Dependencies
 This has been developed on Centos7 with python-openstackclient version 3.15.0 and HTCondor version 8.7.8.
 
