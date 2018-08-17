@@ -2,6 +2,8 @@
 **E**lastic **H**TCondor **O**penStack **S**caling - Pronounced EOS  
 This script is for dynamic creation and deletion of OpenStack virtual machines that run HTCondor execute nodes. It is intended for a scenario where you want to run a compute cluster with a low overhead when the usage is low, and you want to be able to dynamically scale up and scale down your cluster as the usage increases or decreases. There currently is support for similar functionality in HTCondor, called `condor_annex`, but it only works with amazon. It seems like there will be OpenStack support in future releases which will render this script obsolete. There's also the HTCondor grid universe for OpenStack, but it has no dynamic scaling. Many others have built various methods to dynamically scale an HTCondor cluster, but this implementation differs in that it is very simple and has no major dependencies that need special configuration.
 
+## Graphical overview
+The following graphical overview represents a scenario where EHOS is integrated with two Galaxy servers. It depends on an NFS server on the Galaxy instances to be mounted on the execute nodes. This mounting is handled by the Galaxy server to keep EHOS as a standalone versatile solution that is useful for any kind of scenario, Galaxy related or not.
 ![EHOS-overview](https://raw.githubusercontent.com/elixir-no-nels/EHOS/master/.ehos.png)
 
 ## Dependencies
