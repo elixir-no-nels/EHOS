@@ -1,10 +1,11 @@
 #!/bin/bash
 
 ## Uncomment for CLI debugging
-#set -o xtrace
-#set -v
+set -o xtrace
+set -v
 
-exec >logfile 2>&1
+#exec >logfile 2>&1
+exec > >(tee logfile) 2>&1
 
 ## while loop
 while
@@ -44,14 +45,15 @@ do
 
 		## Create execute node if there are idle jobs and the max vm quota is not exceeded
 	elif [[ "$IDLEJOBS" -gt 0 && "${#EXECUTENODES[@]}" -le "$MAXNODES" ]] 2>>logfile; then if [[ "$REQCPUS" -ge 1 ]] || [[ "$IDLEJOBS" -gt "$IDLEJOBVMC" ]] 2>>logfile; then
-		while [ "${#EXECUTENODES[@]}" -lt "$MAXNODES" ]; do
+#		while [[ "${#EXECUTENODES[@]}" -lt "$MAXNODES" ]]; do
 			VM=$(date +%s)
 			echo "There are idle jobs, sending create command for "$CONDORINSTANCENAME"-"${VM}""
 			./createvm.sh $LARGE 2>&1>>logfile
-			sleep 1
+			echo "Sleeping for $LONGSLEEP seconds"
+			sleep $LONGSLEEP
 			echo "Create command for "$CONDORINSTANCENAME"-"${VM}" sent"
 			source $(pwd)/variablecreation.sh
-		done
+#		done
 		date
 		sleep $LONGSLEEP
 	else

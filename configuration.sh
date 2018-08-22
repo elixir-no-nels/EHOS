@@ -14,8 +14,8 @@ readarray SUBMITTINGUSERS < <(echo "-submitter galaxy"; echo "-submitter centos"
 CONDORINSTANCENAME=htcondorexecute
 
 ## Name of the base VM image that will be used as execute node
-#CONDORIMAGENAME=HTCondorVanilla-11-07-18
-CONDORIMAGENAME=("GOLD CentOS 7")
+CONDORIMAGENAME=HTCondorVanilla-20-08-18
+#CONDORIMAGENAME=("GOLD CentOS 7")
 
 ## Security group name(s) openstack
 readarray SECURITYGROUPS < <(echo "--security-group Pipeline-development"; echo "--security-group test"; echo "--security-group default")
@@ -31,7 +31,7 @@ readarray NIC < <(echo "--nic net-id=dualStack")
 ## m1.xlarge: 4 cores, 16B RAM
 ## m2.2xlarge: 8 cores, 32 GB RAM
 ## m2.4xlarge: 16 cores, 64 GB RAM
-SMALL=m1.large
+SMALL=m1.xlarge
 LARGE=m1.xlarge
 
 ## Idle job VM creation variable, when the number of idle jobs is greater than this number, a larger VM is created to speed up the job execution

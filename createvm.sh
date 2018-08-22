@@ -13,7 +13,7 @@ VM=$(date +%s)
 #openstack server create --flavor $1 --image $CONDORIMAGENAME ${NIC[@]} ${SECURITYGROUPS[@]} --key-name $SSHKEY --user-data vm-configs/master-config.yaml $CONDORINSTANCENAME-"${VM}"
 
 ##Execute node
-#openstack server create --flavor $1 --image $CONDORIMAGENAME ${NIC[@]} ${SECURITYGROUPS[@]} --key-name $SSHKEY --user-data vm-configs/execute-config.yaml $CONDORINSTANCENAME-"${VM}"
+openstack server create --flavor $1 --image $CONDORIMAGENAME ${NIC[@]} ${SECURITYGROUPS[@]} --key-name $SSHKEY --user-data vm-configs/execute-config.yaml $CONDORINSTANCENAME-"${VM}"
 
 ## Submit node
 #openstack server create --flavor $1 --image $CONDORIMAGENAME ${NIC[@]} ${SECURITYGROUPS[@]} --key-name $SSHKEY --user-data vm-configs/submit-config.yaml $CONDORINSTANCENAME-"${VM}"
@@ -22,4 +22,4 @@ VM=$(date +%s)
 #openstack server create --flavor $1 --image $CONDORIMAGENAME ${NIC[@]} ${SECURITYGROUPS[@]} --key-name $SSHKEY --user-data vm-configs/kek.yaml $CONDORINSTANCENAME-"${VM}"
 
 ## Vanilla HTCondor
-openstack server create --flavor $1 --image "${CONDORIMAGENAME[@]}" ${NIC[@]} ${SECURITYGROUPS[@]} --key-name $SSHKEY --user-data vm-configs/vanilla-condor.sh $CONDORINSTANCENAME-"${VM}"
+#openstack server create --flavor $1 --image "${CONDORIMAGENAME[@]}" ${NIC[@]} ${SECURITYGROUPS[@]} --key-name $SSHKEY --user-data vm-configs/vanilla-condor.sh $CONDORINSTANCENAME-"${VM}"

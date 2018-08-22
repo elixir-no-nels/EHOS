@@ -26,7 +26,16 @@ libarchive-devel \
 yum-utils \
 device-mapper-persistent-data \
 lvm2 \
-docker-ce
+docker-ce \
+autofs
+
+# Start autofs and enable automatic start at boot
+sudo service autofs start
+sudo systemctl enable autofs
+
+# Create /net and /nels directories
+mkdir /net
+mkdir /nels
 
 ## Install OpenStack CLI tool
 sudo pip install python-openstackclient
